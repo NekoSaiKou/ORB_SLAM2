@@ -40,6 +40,8 @@
 
 #include <mutex>
 
+using namespace cv;
+
 namespace ORB_SLAM2
 {
 
