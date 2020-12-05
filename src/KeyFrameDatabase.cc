@@ -83,10 +83,13 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
     {
         unique_lock<mutex> lock(mMutex);
 
+        // Search all BoW in current keyframes
         for(DBoW2::BowVector::const_iterator vit=pKF->mBowVec.begin(), vend=pKF->mBowVec.end(); vit != vend; vit++)
         {
+            // Search where the current word present through inverted index
             list<KeyFrame*> &lKFs =   mvInvertedFile[vit->first];
 
+            // Search all keyframes that share the word with current keyframe
             for(list<KeyFrame*>::iterator lit=lKFs.begin(), lend= lKFs.end(); lit!=lend; lit++)
             {
                 KeyFrame* pKFi=*lit;
@@ -117,6 +120,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
             maxCommonWords=(*lit)->mnLoopWords;
     }
 
+    // Retain first 20% of keyframes from previous group
     int minCommonWords = maxCommonWords*0.8f;
 
     int nscores=0;
@@ -134,6 +138,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
 
             pKFi->mLoopScore = si;
             if(si>=minScore)
+                // Score, pKFi pair
                 lScoreAndMatch.push_back(make_pair(si,pKFi));
         }
     }
@@ -147,6 +152,7 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
     // Lets now accumulate score by covisibility
     for(list<pair<float,KeyFrame*> >::iterator it=lScoreAndMatch.begin(), itend=lScoreAndMatch.end(); it!=itend; it++)
     {
+        // Iterate through pKFi's 10 best matching neighbors
         KeyFrame* pKFi = it->second;
         vector<KeyFrame*> vpNeighs = pKFi->GetBestCovisibilityKeyFrames(10);
 
@@ -156,9 +162,11 @@ vector<KeyFrame*> KeyFrameDatabase::DetectLoopCandidates(KeyFrame* pKF, float mi
         for(vector<KeyFrame*>::iterator vit=vpNeighs.begin(), vend=vpNeighs.end(); vit!=vend; vit++)
         {
             KeyFrame* pKF2 = *vit;
+            // Check if the neighbor of neighbor of the current frame fullfil minCommonWords constraints and share some words
             if(pKF2->mnLoopQuery==pKF->mnId && pKF2->mnLoopWords>minCommonWords)
             {
                 accScore+=pKF2->mLoopScore;
+                // Change pBestKF
                 if(pKF2->mLoopScore>bestScore)
                 {
                     pBestKF=pKF2;

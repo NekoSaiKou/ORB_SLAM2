@@ -322,6 +322,7 @@ bool LoopClosing::ComputeSim3()
                 const float s = pSolver->GetEstimatedScale();
                 matcher.SearchBySim3(mpCurrentKF,pKF,vpMapPointMatches,s,R,t,7.5);
 
+                // Sim3, from loop keyframe to current keyframe
                 g2o::Sim3 gScm(Converter::toMatrix3d(R),Converter::toVector3d(t),s);
                 const int nInliers = Optimizer::OptimizeSim3(mpCurrentKF, pKF, vpMapPointMatches, gScm, 10, mbFixScale);
 
@@ -330,7 +331,9 @@ bool LoopClosing::ComputeSim3()
                 {
                     bMatch = true;
                     mpMatchedKF = pKF;
+                    // Sim3, from world to loop keyframe
                     g2o::Sim3 gSmw(Converter::toMatrix3d(pKF->GetRotation()),Converter::toVector3d(pKF->GetTranslation()),1.0);
+                    // Sim3, from world to current keyframe
                     mg2oScw = gScm*gSmw;
                     mScw = Converter::toCvMat(mg2oScw);
 
@@ -455,6 +458,7 @@ void LoopClosing::CorrectLoop()
                 cv::Mat Tic = Tiw*Twc;
                 cv::Mat Ric = Tic.rowRange(0,3).colRange(0,3);
                 cv::Mat tic = Tic.rowRange(0,3).col(3);
+                // Sim3, from current to neighbor keyframe
                 g2o::Sim3 g2oSic(Converter::toMatrix3d(Ric),Converter::toVector3d(tic),1.0);
                 g2o::Sim3 g2oCorrectedSiw = g2oSic*mg2oScw;
                 //Pose corrected with the Sim3 of the loop closure
