@@ -274,6 +274,11 @@ int KeyFrame::TrackedMapPoints(const int &minObs)
     return nPoints;
 }
 
+/**
+ * @brief Keyframe MapPoints Getter
+ * 
+ * @return vector<MapPoint*> 
+ */
 vector<MapPoint*> KeyFrame::GetMapPointMatches()
 {
     unique_lock<mutex> lock(mMutexFeatures);

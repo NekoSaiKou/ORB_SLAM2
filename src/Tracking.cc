@@ -203,7 +203,14 @@ cv::Mat Tracking::GrabImageStereo(const cv::Mat &imRectLeft, const cv::Mat &imRe
     return mCurrentFrame.mTcw.clone();
 }
 
-
+/**
+ * @brief The function in which the TRACKING thread get new RGBD image
+ * 
+ * @param imRGB 
+ * @param imD 
+ * @param timestamp 
+ * @return cv::Mat 
+ */
 cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp)
 {
     mImGray = imRGB;
@@ -234,7 +241,6 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     return mCurrentFrame.mTcw.clone();
 }
 
-
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 {
     mImGray = im;
@@ -264,6 +270,12 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
     return mCurrentFrame.mTcw.clone();
 }
 
+/**
+ * @brief Track with mCurrentFrame, which is just updated before this function is called
+ * The ORB of current frame is already extracted and stored in mCurrentFrame.
+ * This function performs Initialization/Relocalization, Track Local Map and New Keyframe Decision
+ * 
+ */
 void Tracking::Track()
 {
     if(mState==NO_IMAGES_YET)
@@ -736,6 +748,11 @@ void Tracking::CreateInitialMapMonocular()
     mState=OK;
 }
 
+/**
+ * @brief Update replaced MapPoints for last frame
+ * Local Mapping might have changed some MapPoints tracked in last frame
+ * 
+ */
 void Tracking::CheckReplacedInLastFrame()
 {
     for(int i =0; i<mLastFrame.N; i++)

@@ -236,6 +236,14 @@ void Optimizer::BundleAdjustment(const vector<KeyFrame *> &vpKFs, const vector<M
 
 }
 
+/**
+ * @brief Optimize camera pose only, mappoints stay unchanged.
+ * g2o edge EdgeSE3ProjectXYZOnlyPose defined by ORB SLAM2 author is used in this function.
+ * The edge is unary edge, error is defined as  (observation - map point), and the only vertex is camera pose
+ * 
+ * @param pFrame 
+ * @return int 
+ */
 int Optimizer::PoseOptimization(Frame *pFrame)
 {
     g2o::SparseOptimizer optimizer;
